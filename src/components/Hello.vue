@@ -27,7 +27,7 @@
           <td class="grid__cell"></td>
         </tr>
       </table>
-      <chip :chip="chip" v-for="chip in chips"/>
+      <chip :chip="chip" v-for="chip in chips" :key="chip.id" />
     </div>
   </div>
 </template>
@@ -41,134 +41,10 @@ export default {
   },
   data () {
     return {
-      chips: [
-        {
-          color: 'blue',
-          row: 1,
-          column: 1
-        },
-        {
-          color: 'red',
-          row: 1,
-          column: 2
-        },
-        {
-          color: 'green',
-          row: 1,
-          column: 3
-        },
-        {
-          color: 'yellow',
-          row: 1,
-          column: 4
-        },
-        {
-          color: 'transparent',
-          row: 1,
-          column: 5
-        },
-        {
-          color: 'yellow',
-          row: 2,
-          column: 1
-        },
-        {
-          color: 'transparent',
-          row: 2,
-          column: 2
-        },
-        {
-          color: 'blue',
-          row: 2,
-          column: 3
-        },
-        {
-          color: 'red',
-          row: 2,
-          column: 4
-        },
-        {
-          color: 'green',
-          row: 2,
-          column: 5
-        },
-        {
-          color: 'green',
-          row: 3,
-          column: 1
-        },
-        {
-          color: 'yellow',
-          row: 3,
-          column: 2
-        },
-        {
-          color: 'transparent',
-          row: 3,
-          column: 3
-        },
-        {
-          color: 'blue',
-          row: 3,
-          column: 4
-        },
-        {
-          color: 'red',
-          row: 3,
-          column: 5
-        },
-        {
-          color: 'transparent',
-          row: 4,
-          column: 1
-        },
-        {
-          color: 'blue',
-          row: 4,
-          column: 2
-        },
-        {
-          color: 'red',
-          row: 4,
-          column: 3
-        },
-        {
-          color: 'green',
-          row: 4,
-          column: 4
-        },
-        {
-          color: 'yellow',
-          row: 4,
-          column: 5
-        },
-        {
-          color: 'red',
-          row: 5,
-          column: 1
-        },
-        {
-          color: 'green',
-          row: 5,
-          column: 2
-        },
-        {
-          color: 'yellow',
-          row: 5,
-          column: 3
-        },
-        {
-          color: 'transparent',
-          row: 5,
-          column: 4
-        },
-        {
-          color: 'blue',
-          row: 5,
-          column: 5
-        }
-      ]
+      chips: this.$store.state.chips
     }
+  },
+  mounted () {
   }
 }
 </script>
