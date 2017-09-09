@@ -1,5 +1,19 @@
 <template>
   <div class="hello">
+    <div class="info">
+      <div>First Target: {{ firstTarget }}</div>
+      <div>Second Target: {{ secondTarget }}</div>
+      <div>Step: {{ step }}</div>
+    </div>
+    <div class="header">
+      <div class="header__player">{{ this.$store.getters.player.name }}の手番です</div>
+      <div class="header__message" v-if="this.$store.state.step == 0">動かすチップを選択してください。</div>
+      <div class="header__message" v-if="this.$store.state.step == 1"></div>
+      <div class="header__message" v-if="this.$store.state.step == 0"></div>
+      <div class="header__message" v-if="this.$store.state.step == 0"></div>
+      <div class="header__message" v-if="this.$store.state.step == 0"></div>
+      <div class="header__message" v-if="this.$store.state.step == 0"></div>
+    </div>
     <div class="board">
       <table class="grid">
         <tr>
@@ -34,14 +48,22 @@
 
 <script>
 import chip from './Chip.vue'
+import { mapState } from 'vuex'
 export default {
   name: 'game',
   components: {
     chip
   },
+  computed: {
+    ...mapState([
+      'firstTarget',
+      'secondTarget',
+      'chips',
+      'step'
+    ])
+  },
   data () {
     return {
-      chips: this.$store.state.chips
     }
   },
   mounted () {
@@ -74,16 +96,10 @@ a {
 // }
 
 .board {
-  margin: auto;
+  margin: 50px auto;
   width: 800px;
   height: 800px;
   position: relative;
-}
-
-.chip {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
 }
 
 .grid {

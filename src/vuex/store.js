@@ -3,7 +3,6 @@ import Vue from 'vue'
 Vue.use(Vuex)
 
 const state = {
-  test: "it's a test",
   chips: [
     {
       id: 1,
@@ -155,11 +154,84 @@ const state = {
       row: 5,
       column: 5
     }
-  ]
+  ],
+  targetChips: [],
+  firstTarget: null,
+  secondTarget: null,
+  step: 0, // 0: 自チップ選択, 1: 移動先選択, 2:移動処理中
+  players: [
+    {
+      id: 1,
+      name: 'Shin',
+      color: 'blue'
+    },
+    {
+      id: 2,
+      name: 'John',
+      color: 'red'
+    },
+    {
+      id: 3,
+      name: 'Jack',
+      color: 'green'
+    },
+    {
+      id: 4,
+      name: 'James',
+      color: 'yellow'
+    }
+  ],
+  turn: 0
 }
-const actions = {}
-const getters = {}
+const actions = {
+  addTarget (context, chip) {
+    if (context.state.step === 0 && context.state.firstTarget === null) {
+      // 自チップ選択
+      context.commit('addFirstTarget', chip)
+      context.state.step++
+    } else if (context.state.step === 1 && context.state.secondTarget === null) {
+      // 移動先選択
+      context.commit('addSecondTarget', chip)
+      context.state.step++
+
+      context.dispatch('move')
+    }
+  },
+  move (context) {
+    if (context.state.firstTarget && context.state.secondTarget && context.state.step === 2) {
+      const firstRow = context.state.firstTarget.row
+      const firstColumn = context.state.firstTarget.column
+      const secondRow = context.state.secondTarget.row
+      const secondColumn = context.state.secondTarget.column
+
+      context.commit('moveChip', {chipId: context.state.firstTarget.id, row: secondRow, column: secondColumn})
+      context.commit('moveChip', {chipId: context.state.secondTarget.id, row: firstRow, column: firstColumn})
+      context.state.firstTarget = null
+      context.state.secondTarget = null
+      context.state.step = 0
+      context.commit('nextTurn')
+    }
+  }
+}
+const getters = {
+  targetChipsCount: state => state.targetChips.length,
+  player: state => state.players[state.turn]
+}
 const mutations = {
+  addFirstTarget (state, chip) {
+    state.firstTarget = chip
+  },
+  addSecondTarget (state, chip) {
+    state.secondTarget = chip
+  },
+  moveChip (state, params) {
+    const chip = state.chips.find(x => x.id === params.chipId)
+    chip.row = params.row
+    chip.column = params.column
+  },
+  nextTurn (state) {
+    state.turn < 3 ? state.turn++ : state.turn = 0
+  }
 }
 
 export default new Vuex.Store({
