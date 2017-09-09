@@ -215,7 +215,36 @@ const actions = {
 }
 const getters = {
   targetChipsCount: state => state.targetChips.length,
-  player: state => state.players[state.turn]
+  player: state => state.players[state.turn],
+  scores: state => {
+    const scores = {
+      'blue': 0,
+      'red': 0,
+      'green': 0,
+      'yellow': 0
+    }
+
+    const isAroundTarget = (target, chip) => {
+      const rowDiff = Math.pow((chip.row - target.row), 2)
+      const columnDiff = Math.pow((chip.column - target.column), 2)
+      return rowDiff <= 1 && columnDiff <= 1 && rowDiff + columnDiff !== 0
+    }
+
+    const filterByColor = color => state.chips.filter(x => x.color === color)
+
+    const colorArray = Object.keys(scores)
+    colorArray.forEach(color => {
+      const chips = filterByColor(color)
+      let arounds = 0
+      chips.forEach(chip => {
+        arounds += chips.filter(x => isAroundTarget(chip, x)).length
+      })
+      const score = arounds / 2
+      if (score >= 5) state.step = 3
+      scores[color] = score
+    })
+    return scores
+  }
 }
 const mutations = {
   addFirstTarget (state, chip) {
