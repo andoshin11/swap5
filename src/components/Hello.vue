@@ -1,11 +1,6 @@
 <template>
   <div class="hello">
-    <div class="info">
-      <div>First Target: {{ firstTarget }}</div>
-      <div>Second Target: {{ secondTarget }}</div>
-      <div>Step: {{ step }}</div>
-      <div>Score: {{ scores }}</div>
-    </div>
+    <scores />
     <div class="header">
       <div class="header__player">{{ this.$store.getters.player.name }}の手番です</div>
       <div class="header__message" v-if="this.$store.state.step == 0">動かすチップを選択してください。</div>
@@ -47,11 +42,13 @@
 
 <script>
 import chip from './Chip.vue'
+import scores from './Scores.vue'
 import { mapState, mapGetters } from 'vuex'
 export default {
   name: 'game',
   components: {
-    chip
+    chip,
+    scores
   },
   computed: {
     ...mapState([
@@ -99,8 +96,8 @@ a {
 
 .board {
   margin: 50px auto;
-  width: 800px;
-  height: 800px;
+  width: 600px;
+  height: 600px;
   position: relative;
 }
 

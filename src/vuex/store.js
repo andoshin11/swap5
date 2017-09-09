@@ -216,6 +216,7 @@ const actions = {
 const getters = {
   targetChipsCount: state => state.targetChips.length,
   player: state => state.players[state.turn],
+  colors: (state, getters) => Object.keys(getters.scores),
   scores: state => {
     const scores = {
       'blue': 0,

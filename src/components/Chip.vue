@@ -16,10 +16,10 @@ export default {
   name: 'chip',
   computed: {
     top () {
-      return (((this.chip.row - 1) * 200) + -30) + 'px'
+      return (((this.chip.row - 1) * 150) + -30) + 'px'
     },
     left () {
-      return (((this.chip.column - 1) * 200) + -30) + 'px'
+      return (((this.chip.column - 1) * 150) + -30) + 'px'
     },
     isMyChip () {
       return this.$store.state.step === 0 && this.$store.getters.player.color === this.chip.color
