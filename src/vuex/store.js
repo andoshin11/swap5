@@ -2,6 +2,80 @@ import Vuex from 'vuex'
 import Vue from 'vue'
 Vue.use(Vuex)
 
+const shuffle = array => {
+  const length = array.length
+  for (let i = length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    const tmp = array[i]
+    array[i] = array[j]
+    array[j] = tmp
+  }
+  return array
+}
+
+const cards = shuffle([
+  {
+    id: 1,
+    name: '1 ⇄ 2',
+    firstColumn: 1,
+    secondColumn: 2
+  },
+  {
+    id: 2,
+    name: '2 ⇄ 3',
+    firstColumn: 2,
+    secondColumn: 3
+  },
+  {
+    id: 3,
+    name: '3 ⇄ 4',
+    firstColumn: 3,
+    secondColumn: 4
+  },
+  {
+    id: 4,
+    name: '4 ⇄ 5',
+    firstColumn: 4,
+    secondColumn: 5
+  },
+  {
+    id: 5,
+    name: '5 ⇄ 1',
+    firstColumn: 5,
+    secondColumn: 1
+  },
+  {
+    id: 6,
+    name: 'A ⇄ B',
+    firstRow: 1,
+    secondRow: 2
+  },
+  {
+    id: 7,
+    name: 'B ⇄ C',
+    firstRow: 2,
+    secondRow: 3
+  },
+  {
+    id: 8,
+    name: 'C ⇄ D',
+    firstRow: 3,
+    secondRow: 4
+  },
+  {
+    id: 9,
+    name: 'D ⇄ E',
+    firstRow: 4,
+    secondRow: 5
+  },
+  {
+    id: 10,
+    name: 'E ⇄ A',
+    firstRow: 5,
+    secondRow: 1
+  }
+])
+
 const state = {
   chips: [
     {
@@ -24,7 +98,7 @@ const state = {
     },
     {
       id: 4,
-      color: 'yellow',
+      color: 'gold',
       row: 1,
       column: 4
     },
@@ -36,7 +110,7 @@ const state = {
     },
     {
       id: 6,
-      color: 'yellow',
+      color: 'gold',
       row: 2,
       column: 1
     },
@@ -72,7 +146,7 @@ const state = {
     },
     {
       id: 12,
-      color: 'yellow',
+      color: 'gold',
       row: 3,
       column: 2
     },
@@ -120,7 +194,7 @@ const state = {
     },
     {
       id: 20,
-      color: 'yellow',
+      color: 'gold',
       row: 4,
       column: 5
     },
@@ -138,7 +212,7 @@ const state = {
     },
     {
       id: 23,
-      color: 'yellow',
+      color: 'gold',
       row: 5,
       column: 3
     },
@@ -163,22 +237,26 @@ const state = {
     {
       id: 1,
       name: 'Shin',
-      color: 'blue'
+      color: 'blue',
+      usedCards: []
     },
     {
       id: 2,
       name: 'John',
-      color: 'red'
+      color: 'red',
+      usedCards: []
     },
     {
       id: 3,
       name: 'Jack',
-      color: 'green'
+      color: 'green',
+      usedCards: []
     },
     {
       id: 4,
       name: 'James',
-      color: 'yellow'
+      color: 'gold',
+      usedCards: []
     }
   ],
   turn: 0
@@ -211,6 +289,39 @@ const actions = {
       context.state.step = 0
       context.commit('nextTurn')
     }
+  },
+  useCard (context, params) {
+    const playerId = params.playerId
+    const cardId = params.cardId
+    const firstRow = params.firstRow
+    const secondRow = params.secondRow
+    const firstColumn = params.firstColumn
+    const secondColumn = params.secondColumn
+    if (playerId && firstRow && secondRow) {
+      context.dispatch('swapRows', {firstRow: firstRow, secondRow: secondRow})
+      context.commit('useCard', {playerId: playerId, cardId: cardId})
+      context.commit('nextTurn')
+    } else if (playerId && firstColumn && secondColumn) {
+      context.dispatch('swapColumns', {firstColumn: firstColumn, secondColumn: secondColumn})
+      context.commit('useCard', {playerId: playerId, cardId: cardId})
+      context.commit('nextTurn')
+    }
+  },
+  swapColumns (context, params) {
+    const firstColumn = params.firstColumn
+    const secondColumn = params.secondColumn
+    const firstColumns = context.state.chips.filter(x => x.column === firstColumn)
+    const secondColumns = context.state.chips.filter(x => x.column === secondColumn)
+
+    firstColumns.forEach(x => context.commit('moveChip', {chipId: x.id, row: x.row, column: secondColumn}))
+    secondColumns.forEach(x => context.commit('moveChip', {chipId: x.id, row: x.row, column: firstColumn}))
+  },
+  swapRows (context, params) {
+    const firstRows = context.state.chips.filter(x => x.row === params.firstRow)
+    const secondRows = context.state.chips.filter(x => x.row === params.secondRow)
+
+    firstRows.forEach(x => context.commit('moveChip', {chipId: x.id, row: params.secondRow, column: x.column}))
+    secondRows.forEach(x => context.commit('moveChip', {chipId: x.id, row: params.firstRow, column: x.column}))
   }
 }
 const getters = {
@@ -222,7 +333,7 @@ const getters = {
       'blue': 0,
       'red': 0,
       'green': 0,
-      'yellow': 0
+      'gold': 0
     }
 
     const isAroundTarget = (target, chip) => {
@@ -241,10 +352,20 @@ const getters = {
         arounds += chips.filter(x => isAroundTarget(chip, x)).length
       })
       const score = arounds / 2
-      if (score >= 5) state.step = 3
+      if (score >= 5) {
+        state.step = 3
+        window.alert('ゲームが終了しました')
+      }
       scores[color] = score
     })
     return scores
+  },
+  cards: state => {
+    const data = {}
+    state.players.forEach((x, index) => {
+      data[x.id] = cards.slice(index * 2, (index * 2) + 2).filter(c => x.usedCards.indexOf(c.id) === -1)
+    })
+    return data
   }
 }
 const mutations = {
@@ -261,6 +382,13 @@ const mutations = {
   },
   nextTurn (state) {
     state.turn < 3 ? state.turn++ : state.turn = 0
+  },
+  useCard (state, params) {
+    const playerId = params.playerId
+    const cardId = params.cardId
+
+    const player = state.players.find(x => x.id === playerId)
+    player.usedCards.push(cardId)
   }
 }
 

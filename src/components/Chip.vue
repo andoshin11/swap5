@@ -28,6 +28,7 @@ export default {
       return this.firstTarget && !this.secondTarget && Math.pow((this.chip.row - this.firstTarget.row), 2) + Math.pow((this.chip.column - this.firstTarget.column), 2) === 1
     },
     canExecAddTarget () {
+      if (this.step === 3) return false
       if (this.step === 0) {
         return this.isMyChip
       } else if (this.step === 1) {
