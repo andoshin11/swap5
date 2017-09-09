@@ -1,0 +1,8 @@
+{
+  "clientId": "885439308126-spqm1dfa8v5bf5r5s3phuvegd4t9nb1u.apps.googleusercontent.com",
+  "projectId": "swap5-2d4fd",
+  "serviceAccountEmail": "",
+  "serviceAccountPrivateKeyFile": "INSERT/PATH/TO/PRIVATEKEY",
+  "widgetUrl": "https://swap5.herokuapp.com/",
+  "cookieName": "gtoken"
+}
