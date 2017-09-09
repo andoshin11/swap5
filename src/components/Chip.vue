@@ -1,5 +1,5 @@
 <template>
-      <div class="chip" :class="{myChip: isMyChip }" style="position:absolute;" :style="{ top: top, left: left, backgroundColor: chip.color }" @click="addTarget"></div>
+      <div class="chip" :class="{myChip: isMyChip, targetChip: isTargetChip, isTransparent: chip.color === 'transparent' }" style="position:absolute;" :style="{ top: top, left: left, backgroundColor: chip.color }" @click="addTarget"></div>
     </div>
   </div>
 </template>
@@ -24,10 +24,23 @@ export default {
     isMyChip () {
       return this.$store.state.step === 0 && this.$store.getters.player.color === this.chip.color
     },
+    isTargetChip () {
+      return this.firstTarget && !this.secondTarget && Math.pow((this.chip.row - this.firstTarget.row), 2) + Math.pow((this.chip.column - this.firstTarget.column), 2) === 1
+    },
+    canExecAddTarget () {
+      if (this.step === 0) {
+        return this.isMyChip
+      } else if (this.step === 1) {
+        return this.isTargetChip
+      } else {
+        return false
+      }
+    },
     ...mapState([
       'firstTarget',
       'secondTarget',
-      'chips'
+      'chips',
+      'step'
     ])
   },
   data () {
@@ -36,7 +49,7 @@ export default {
   },
   methods: {
     addTarget () {
-      this.$store.dispatch('addTarget', this.chip)
+      if (this.canExecAddTarget) this.$store.dispatch('addTarget', this.chip)
     }
   },
   mounted () {
@@ -61,6 +74,17 @@ export default {
     cursor: pointer;
     &:hover{
       box-shadow:5px 5px 10px;
+    }
+  }
+
+  .targetChip {
+    transition: .3s;
+    cursor: pointer;
+    &:hover{
+      box-shadow:5px 5px 10px;
+    }
+    &.isTransparent:hover{
+      box-shadow: none;
     }
   }
 </style>
