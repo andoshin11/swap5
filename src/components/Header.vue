@@ -1,20 +1,22 @@
 <template>
   <div class="header">
-    <div class="header__logo">Swap 5 {{ signedIn }}</div>
-    <!-- <div class="header__user">{{ user.displayName }}</div> -->
+    <a class="header__logo" href="/">SWAP 5</a>
+    <a href="/#/" class="header__link">トップ</a>
+    <a href="/#/room" class="header__link">ルーム</a>
     <div class="header__nav nav">
-      <button @click="signInWithTwitter" v-if="!signedIn">Sign in</button>
-      <button @click="signOutFromTwitter" v-if="signedIn">Sign out</button>
+      <button @click="signInWithTwitter" v-if="!signedIn">Twitterでログイン</button>
+      <button @click="signOutFromTwitter" v-if="signedIn">ログアウト</button>
     </div>
   </div>
 </template>
 
 <script>
-import Firebase from 'firebase'
+import signIn from '@/utils/sign_in'
 import { mapState } from 'vuex'
 
 export default {
   name: 'game',
+  extends: signIn,
   components: {
   },
   computed: {
@@ -28,23 +30,6 @@ export default {
     }
   },
   methods: {
-    signInWithTwitter () {
-      const provider = new Firebase.auth.TwitterAuthProvider()
-      Firebase.auth().signInWithPopup(provider).then(result => {
-        const token = result.credential.accessToken
-        const secret = result.credential.secret
-        const user = result.user
-        const loginStatus = user !== null && user !== undefined
-        this.$store.dispatch('setTwitterCredential', {token: token, secret: secret})
-        this.$store.dispatch('setUser', user)
-        this.$store.dispatch('setLoginStatus', loginStatus)
-      }).catch(err => console.log(err))
-    },
-    signOutFromTwitter () {
-      Firebase.auth().signOut().then(() => {
-        this.$store.dispatch('removeUser')
-      }).catch(err => console.log(err))
-    }
   },
   mounted () {
   }
@@ -67,11 +52,23 @@ export default {
       width: 20%;
       text-align: center;
       font-weight: bold;
+      color: #666;
+      text-decoration: none;
     }
     &__nav {
       display: inline-block;
       width: 20%;
       float: right;
+    }
+    &__link {
+      color: #666;
+      text-decoration: none;
+      padding: 0 20px;
+      transition: .3s;
+      &:hover {
+        opacity: .7;
+        text-decoration: underline;
+      }
     }
   }
 </style>

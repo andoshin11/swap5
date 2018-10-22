@@ -1,16 +1,29 @@
 <template>
-  <div class="hello">
+  <div class="room">
     <players />
     <scores />
     <cards />
     <div class="header">
-      <div class="header__player"><span :style="{ color: player.color }" style="font-weight:bold;">{{ player.name }}</span>の手番です</div>
-      <div class="header__message" v-if="this.$store.state.step == 0">動かすチップを選択してください。</div>
-      <div class="header__message" v-if="this.$store.state.step == 1">移動先を選んでください</div>
-      <div class="header__message" v-if="this.$store.state.step == 2"></div>
-      <div class="header__message" v-if="this.$store.state.step == 3">ゲームが終了しました</div>
+      <div class="header__room" v-if="currentRoom">{{ currentRoom.name }}</div>
+      <div class="header__player" v-if="currentRoom && currentRoom.step !== 3">
+        <span :style="{ color: currentPlayer.color }" style="font-weight:bold;">
+          {{ currentPlayer.isDummy ? 'ダミーユーザー' : getFbUser(currentPlayer).username }}
+        </span>
+        の手番です
+      </div>
+      <button v-if="currentPlayer.isDummy" @click="playDummy()">次の手番へ</button>
+      <div class="header__message" v-if="currentRoom && currentRoom.step == 0">動かすチップを選択してください。</div>
+      <div class="header__message" v-if="currentRoom && currentRoom.step == 1">移動先を選んでください</div>
+      <div class="header__message" v-if="currentRoom && currentRoom.step == 2"></div>
+      <div class="header__message" v-if="currentRoom && currentRoom.step == 3">
+        ゲームが終了しました
+        <ul class="winner-list">
+          <li class="winner-list__item" v-for="winner in Object.keys(currentRoom.winners)" :style="{ color: currentRoom.players[winner].color }">{{ getFbUserById(winner).username }}</li>
+        </ul>
+        の勝利です
+      </div>
+      <button class="header__reset" @click="reset()">ゲームをリセット</button>
     </div>
-    <button type="button" name="button" @click="addUser()">push</button>
     <div class="board">
       <div class="board-labels board-labels_on_top">
         <div class="board-labels__item">1</div>
@@ -52,7 +65,7 @@
           <td class="grid__cell"></td>
         </tr>
       </table>
-      <chip :chip="chip" v-for="chip in chips" :key="chip.id" />
+      <chip :chip="chip" v-for="chip in currentChips" :key="chip.id" v-if="currentRoom"/> -->
     </div>
   </div>
 </template>
@@ -64,19 +77,6 @@ import scores from './Scores.vue'
 import players from './Players.vue'
 // import Firebase from 'firebase'
 import { mapState, mapGetters } from 'vuex'
-//
-// let config = {
-//   apiKey: 'AIzaSyCKGjC60tlhpTTQMk9iDtyey1DFOdzpD5k',
-//   authDomain: 'swap5-2d4fd.firebaseapp.com',
-//   databaseURL: 'https://swap5-2d4fd.firebaseio.com',
-//   storageBucket: 'swap5-2d4fd.appspot.com',
-//   messagingSenderId: '885439308126'
-// }
-//
-// let app = Firebase.initializeApp(config)
-// let db = app.database()
-//
-// let usersRef = db.ref('users')
 
 export default {
   name: 'game',
@@ -90,34 +90,62 @@ export default {
     ...mapState([
       'firstTarget',
       'secondTarget',
-      'chips',
-      'step'
+      'step',
+      'user',
+      'roomsRef',
+      'usersRef',
+      'signedIn'
     ]),
     ...mapGetters([
       'scores',
-      'player'
-    ])
+      'player',
+      'currentRoom',
+      'currentPlayer',
+      'currentChips',
+      'fbUser'
+    ]),
+    fbUserInfo () {
+      return this.currentPlayer ? this.usersRef.find(x => x['.key'] === this.user.uid) : null
+    }
   },
   data () {
     return {
     }
   },
-  firebase: {
-    // users: usersRef
-  },
   methods: {
-    addUser () {
-      // usersRef.push({
-      //   name: 'Masaki Ando',
-      //   username: 'masaki0819'
-      // })
-      // const address = this.users.length - 1
-      // usersRef.child(this.users[address]['.key']).remove()
+    getUid (player) {
+      return Object.keys(this.currentRoom.players).find(x => this.currentRoom.players[x].playerNum === player.playerNum)
+    },
+    getFbUser (player) {
+      const uid = this.getUid(player)
+      return uid ? this.usersRef.find(x => x['.key'] === uid) : null
+    },
+    getFbUserById (uid) {
+      return uid ? this.usersRef.find(x => x['.key'] === uid) : null
+    },
+    reset () {
+      const roomId = this.currentRoom['.key']
+      this.$store.dispatch('resetGame', roomId)
+    },
+    playDummy () {
+      const roomId = this.currentRoom['.key']
+      this.$store.dispatch('playDummy', roomId)
+    }
+  },
+  watch: {
+    scores () {
+      const winners = Object.keys(this.scores).filter(x => this.scores[x] >= 5)
+      if (winners && winners.length) {
+        console.log('calling endGame')
+        this.$store.dispatch('endGame', { roomId: this.currentRoom['.key'], scores: this.scores })
+      }
     }
   },
   mounted () {
-    console.log('testing VueFire')
-    // console.log(this.users)
+    // if (!this.signedIn) {
+    //   alert('ログインしてください')
+    //   window.location.href = '/#/'
+    // }
   }
 }
 </script>
@@ -185,6 +213,10 @@ a {
   &__cell {
     border: solid 1px grey;
   }
+}
+
+.room {
+  padding-top: 50px;
 }
 
 </style>

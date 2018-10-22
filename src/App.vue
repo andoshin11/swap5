@@ -1,12 +1,19 @@
 <template>
   <div id="app">
-    <router-view></router-view>
+    <headerComponent />
+    <main>
+      <router-view></router-view>
+    </main>
   </div>
 </template>
 
 <script>
+import headerComponent from '@/components/Header.vue'
 export default {
-  name: 'app'
+  name: 'app',
+  components: {
+    headerComponent
+  }
 }
 </script>
 
@@ -18,5 +25,12 @@ export default {
   text-align: center;
   color: #2c3e50;
   /*margin-top: 60px;*/
+}
+body {
+  margin: 0;
+}
+main {
+  position: relative;
+  top: 40px;
 }
 </style>

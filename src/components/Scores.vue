@@ -25,6 +25,5 @@ export default {
     top: 20px;
     padding: 10px;
     border: solid 1px;
-    position: fixed;
   }
 </style>

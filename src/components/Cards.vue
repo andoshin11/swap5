@@ -1,33 +1,50 @@
 <template>
-  <div class="cards">
-    <div class="card" v-for="card in cards[player.id]" @click="useCard(card)">{{ card.name }}</div>
-    <div class="cards__header">{{ player.name }}のカード</div>
+  <div class="cards" v-if="currentRoom">
+    <div class="card" v-for="card in currentPlayerCards" @click="useCard(card)">{{ card.name }}</div>
+    <div class="cards__header">{{ currentPlayer.isDummy ? 'ダミーユーザー' : getFbUser(currentPlayer).username }}のカード</div>
   </div>
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapState, mapGetters } from 'vuex'
 export default {
   name: 'cards',
   computed: {
+    ...mapState([
+      'usersRef',
+      'user'
+    ]),
     ...mapGetters([
-      'player',
-      'cards'
-    ])
+      'currentRoom',
+      'currentPlayer',
+      'currentPlayerCards'
+    ]),
+    isValidUser () {
+      const turn = this.currentRoom.turn
+      return turn === this.currentRoom.players[this.user.uid].playerNum
+    }
   },
   data () {
     return {
     }
   },
   methods: {
+    getUid (player) {
+      return this.currentRoom ? Object.keys(this.currentRoom.players).find(x => this.currentRoom.players[x].playerNum === player.playerNum) : null
+    },
+    getFbUser (player) {
+      const uid = this.getUid(player)
+      return uid ? this.usersRef.find(x => x['.key'] === uid) : null
+    },
     useCard (card) {
+      if (!this.isValidUser) {
+        alert('他のプレイヤーがプレイ中です')
+        return
+      }
       this.$store.dispatch('useCard', {
-        playerId: this.player.id,
-        cardId: card.id,
-        firstRow: card.firstRow,
-        secondRow: card.secondRow,
-        firstColumn: card.firstColumn,
-        secondColumn: card.secondColumn
+        roomId: this.currentRoom['.key'],
+        uid: this.getUid(this.currentPlayer),
+        card: card
       })
     }
   },
@@ -58,10 +75,9 @@ export default {
   .cards {
     position: absolute;
     left: 20px;
-    bottom: 20px;
+    bottom: -30px;
     padding: 10px;
     border: solid 1px;
-    position: fixed;
     &__header {
       margin: 5px auto;
     }
